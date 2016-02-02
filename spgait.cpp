@@ -54,7 +54,7 @@ public:
         RegisterCommand("SaveTrajectories",boost::bind(&spGait::SaveTrajectories,this,_1,_2),
                         "Save current Trajectories in 3 files");
         RegisterCommand("ManipTarget",boost::bind(&spGait::ManipTarget,this,_1,_2),
-                        "Move the -arg1- Manipulator to x,y,z,(position) i,j,k,w (quaternion)(-arg2-..-arg8-) space position");
+                        "Move the -arg1- Manipulator to x,y,z(position) i,j,k,w(quaternion) (-arg2-..-arg8-) space position");
         env=penv;
 
         physics = env->GetPhysicsEngine();
