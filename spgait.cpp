@@ -53,6 +53,8 @@ public:
                         "Print the trajectory. Arg1 = Frame of reference (root or floor). Arg2 = manipulator");
         RegisterCommand("SaveTrajectories",boost::bind(&spGait::SaveTrajectories,this,_1,_2),
                         "Save current Trajectories in 3 files");
+        RegisterCommand("ManipTarget",boost::bind(&spGait::ManipTarget,this,_1,_2),
+                        "Move the -arg1- Manipulator to x,y,z,(position) i,j,k,w (quaternion)(-arg2-..-arg8-) space position");
         env=penv;
 
         physics = env->GetPhysicsEngine();
@@ -185,7 +187,7 @@ public:
 
         sout << "Changing z for " << dz << " meters";
 
-        std::vector<dReal> initValues(28,0);
+        //std::vector<dReal> initValues(28,0);
         std::vector<Transform> effectorPoses;
 
 
@@ -422,6 +424,50 @@ public:
     {
 
         ExportJointTrajectories(csTrajectory);
+        return true;
+    }
+
+    bool ManipTarget(std::ostream& sout, std::istream& sinput)
+    {
+        //input manager
+        std::string input;
+        sinput >> input;
+        uint manipNumber;
+
+        manipNumber = atol(&input[1]);
+
+        dReal x,y,z;
+        dReal i,j,k,w;
+        sinput >> x;
+        sinput >> y;
+        sinput >> z;
+        sinput >> i;
+        sinput >> j;
+        sinput >> k;
+        sinput >> w;
+
+        //std::cout << manipNumber << x << y << z << i << j << k << w << std::endl;
+
+        std::vector<Transform> effectorPoses;
+
+
+        //set the initial trajectory point
+        CurrentWorkspacePose(effectorPoses);
+        AddWorkspaceWaypoint(effectorPoses);
+
+        Transform target;
+        target= effectorPoses[manipNumber];
+
+        target.identity();
+        target.trans = RaveVector<dReal>(x,y,z);
+        target.rotate(RaveVector<dReal>(i,j,k,w));
+
+        //change effectorPoses[manipNumber] with the target
+        effectorPoses[manipNumber]=target;
+        AddWorkspaceWaypoint(effectorPoses);
+
+        WorkspaceTrajectoryToJoints(wsTrajectory, csTrajectory);
+
         return true;
     }
 
